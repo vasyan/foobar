@@ -14,13 +14,18 @@ var PostsStore = Reflux.createStore({
 	fetchList(publicId) {
 		// localStorage.setItem(localStorageKey, JSON.stringify(postsList));
 		// if we used a real database, we would likely do the below in a callback
+		publicId = publicId || "lovekld39";
+		this.isLoading = true;
 		return new Promise((resolve, reject) => {
 			$.ajax({
 				type:"GET",
 				dataType:"jsonp",
-				url: "https://api.vk.com/method/wall.get?domain=lovekld39",
+				url: "https://api.vk.com/method/wall.get?domain=" + publicId,
 				success(data) {
 					resolve(data.response);
+				},
+				error(err) {
+					reject(err)
 				}
 			});
 		});
@@ -32,17 +37,19 @@ var PostsStore = Reflux.createStore({
 	getPosts(publicId) {
 		console.log("Get new posts from", publicId);
 		// var loadedList =
-		var loadedList = this.fetchList(),
+		var loadedList = this.fetchList(publicId),
 			self = this;
 
 		loadedList.then((payload) => {
 			console.log("Resolve!", payload);
 			self.postsList = payload;
+			self.isLoading = false;
 			self.trigger(payload);
+		}).catch((err) => {
+			console.log("AJAX error", err);
 		});
 
 	},
-
 
 	// this will be called by all listening components as they register their listeners
 	getInitialState: function() {
@@ -63,7 +70,7 @@ var PostsStore = Reflux.createStore({
 		// 	});
 		// }
 		// return this.postsList;
-		return [];
+		return [{key: postsCounter++, text: "text"}];
 	}
 
 });

@@ -5,44 +5,25 @@ var ReactRouter = require('react-router');
 var Reflux = require('reflux');
 var PostsActions = require('../actions/PostsActions');
 var PostsStore = require('../stores/PostsStore');
+var PostItem = require('./PostItem.jsx');
+
 var _ = require('underscore');
 
-var PostItem = React.createClass({
-	propTypes: {
-		fullName: React.PropTypes.string.isRequired,
-		key: React.PropTypes.number
-	},
-	mixins: [React.addons.LinkedStateMixin], // exposes this.linkState used in render
-
-	getInitialState: function() {
-		return {};
-	},
-
-	handleDestroy: function() {
-		PostsActions.removeItem(this.props.key);
-	},
-	render: function() {
-		// var classes = React.addons.classSet({
-		//   'completed': this.props.isComplete,
-		//   'editing': this.state.isEditing
-		// });
-		return (
-			<li>
-				<div className="view">
-					<p>{this.props.text}</p>
-				</div>
-			</li>
-		);
-}
-});
 
 var PostsMain = React.createClass({
 	propTypes: {
 		postsList: React.PropTypes.arrayOf(React.PropTypes.object).isRequired
 	},
-	// mixins: [
-	// 	ReactRouter.State
-	// ],
+	mixins: [
+		ReactRouter.State
+	],
+
+	getInitialState: function() {
+		return {
+			isLoading: false
+		};
+	},
+
 	render: function() {
 		var filteredList;
 		switch(this.props.showing){
@@ -50,22 +31,31 @@ var PostsMain = React.createClass({
 				filteredList = this.props.postsList;
 				break;
 			case "men":
-				filteredList = _.filter(this.props.postsList, function(item){ return item.sex === 0; });
+				filteredList = _.filter(this.props.postsList, function(item){
+					return item.sex === 0;
+				});
 				break;
 			case "women":
-				filteredList = _.filter(this.props.postsList, function(item){ return item.sex === 1; });
+				filteredList = _.filter(this.props.postsList, function(item){
+					return item.sex === 1;
+				});
 				break;
 			default:
 				filteredList = this.props.postsList;
 		}
-		var classes = React.addons.classSet({
+		// var classes = React.addons.classSet({
 			// "hidden": this.props.postsList.length < 1
-		});
+		// });
+
+		var loadingClass = this.state.isLoading ? "is-loading" : "is-not-loading";
+
+
 		return (
-			<section className={classes}>
+			<section>
+				<span className={loadingClass}>Loading</span>
 				<ul className="js-posts-list">
-					{ filteredList.map(function(item){
-						return <PostItem text={item.text} key={item.key}/>;
+					{ filteredList.map((item) => {
+						return <PostItem text={item.text} key={item.key}/>
 					})
 					}
 				</ul>
@@ -75,8 +65,8 @@ var PostsMain = React.createClass({
 });
 
 var PostsHeader = React.createClass({
-	handleNewSearch(event) {
-		var url = this.refs.urlInput.getDOMNode().value;
+	handleNewSearch() {
+		var url = this.refs.urlInput.getDOMNode().value.match(/\/([\w\d]+)$/)[1];
 		console.log("Handle new search", url);
 		PostsActions.getPosts(url);
 	},
@@ -127,14 +117,15 @@ var PostsApp = React.createClass({
 
 	render: function() {
 		console.log("state", this.state, this.props);
+
 		return (
 			<div>
 				<PostsHeader />
 				<ReactRouter.RouteHandler {...this.props} postsList={this.state.postsList}/>
 				<PostsFooter postsList={this.state.postsList} />
 			</div>
-			);
-}
+		);
+	}
 });
 
 var routes = (
