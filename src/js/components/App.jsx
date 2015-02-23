@@ -55,7 +55,7 @@ var PostsMain = React.createClass({
 				<span className={loadingClass}>Loading</span>
 				<ul className="js-posts-list">
 					{ filteredList.map((item) => {
-						return <PostItem text={item.text} key={item.key}/>
+						return <PostItem text={item.text} key={item.key}/>;
 					})
 					}
 				</ul>
@@ -66,7 +66,8 @@ var PostsMain = React.createClass({
 
 var PostsHeader = React.createClass({
 	handleNewSearch() {
-		var url = this.refs.urlInput.getDOMNode().value.match(/\/([\w\d]+)$/)[1];
+		var url = this.refs.urlInput.getDOMNode().value;
+		if (url) url = url.match(/\/([\w\d]+)$/)[1];
 		console.log("Handle new search", url);
 		PostsActions.getPosts(url);
 	},
