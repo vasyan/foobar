@@ -4,8 +4,8 @@ var React      = require('react/addons');
 var Reflux     = require('reflux');
 var actions    = require('../actions/actions');
 var postsStore = require('../stores/postStore');
-var Spinner    = require('../components/spinner');
-var Post       = require('../components/post');
+var Spinner    = require('../components/spinner.jsx');
+var Post       = require('../components/post.jsx');
 var Router     = require('react-router');
 var Link       = Router.Link;
 
@@ -27,17 +27,17 @@ var Posts = React.createClass({
 		};
 	},
 
-	statics: {
+	// statics: {
 
-		willTransitionTo: function(transition, params) {
-			actions.listenToPosts(+params.pageNum || 1);
-		},
+	// 	willTransitionTo: function(transition, params) {
+	// 		actions.listenToPosts(+params.pageNum || 1);
+	// 	},
 
-		willTransitionFrom: function() {
-			actions.stopListeningToPosts();
-		}
+	// 	willTransitionFrom: function() {
+	// 		actions.stopListeningToPosts();
+	// 	}
 
-	},
+	// },
 
 	onStoreUpdate: function(postsData) {
 		if (!postsData.posts.length) {
@@ -71,6 +71,11 @@ var Posts = React.createClass({
 		}
 	},
 
+	onNewSearch: function() {
+		var url = this.refs.urlInput.getDOMNode().value;
+		actions.loadUsersFromUrl(url);
+	},
+
 	render: function() {
 		var posts = this.state.posts;
 		var currentPage = this.state.currentPage || 1;
@@ -90,6 +95,8 @@ var Posts = React.createClass({
 
 		return (
 			<div className="content full-width">
+				<input ref="urlInput" type="text" placeholder="Public url"/>
+				<button onClick={ this.onNewSearch }>Search</button>
 				<label htmlFor="sortby-select" className="sortby-label">Sort by </label>
 				<div className="sortby">
 					<select

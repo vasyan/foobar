@@ -1,5 +1,3 @@
-'use strict';
-
 var $ = require('jquery');
 var React = require('react/addons');
 var Reflux  = require('reflux');
@@ -12,8 +10,8 @@ var DefaultRoute  = Router.DefaultRoute;
 var Link          = Router.Link;
 
 var actions    = require('./actions/actions');
-var Posts      = require('./views/posts');
-var SinglePost = require('./views/single');
+var Posts      = require('./views/posts.jsx');
+// var SinglePost = require('./views/single');
 
 var HuntPosts = React.createClass({
 
@@ -27,14 +25,15 @@ var HuntPosts = React.createClass({
 
 		return (
 			<div className="wrapper full-height">
-				<header className={ headerCx }>
+				<header>
 					<h3>Header here!</h3>
 				</header>
 				<main className="js-main-container">
 					<RouteHandler { ...this.props }/>
 				</main>
 			</div>
-		);
+		)
+	}
 });
 
 var routes = (
@@ -45,5 +44,5 @@ var routes = (
 );
 
 Router.run(routes, function(Handler, state) {
-  React.render(<Handler params={ state.params } />, document.querySelector('js-main-container'));
+  React.render(<Handler params={ state.params } />, document.querySelector('.js-main-container'));
 });

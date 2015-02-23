@@ -1,5 +1,3 @@
-'use strict';
-
 var React   = require('react');
 var actions = require('../actions/actions');
 var Link    = require('react-router').Link;
@@ -9,7 +7,7 @@ var Post = React.createClass({
 	mixins: [
 		require('../mixins/pluralize'),
 		require('../mixins/abbreviateNumber'),
-		require('../mixins/hostnameFromUrl'),
+		require('../mixins/hostNameFromUrl'),
 		require('../mixins/timeAgo')
 	],
 

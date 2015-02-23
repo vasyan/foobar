@@ -1,4 +1,4 @@
-var PostsActions = require('../actions/PostsActions');
+var PostsActions = require('../actions/actions');
 var _ = require('underscore');
 var Reflux = require('reflux');
 var $ = require('zepto-browserify').$;
@@ -38,6 +38,7 @@ var PostsStore = Reflux.createStore({
 
 	getPosts(options) {
 		this._fetchList(options.url).then()
+		console.log("Get posts");
 	},
 
 	_getPosts(publicId) {
