@@ -1,4 +1,5 @@
 var usersTable = {};
+var $ = require('jquery');
 var _ = require('underscore');
 
 function getPosts(options) {
@@ -112,11 +113,11 @@ function _fetchList(publicId) {
 }
 
 function _fetchActiveUsers(url) {
-	return new Promise(resolve, reject => {
+	return new Promise((resolve, reject) => {
 		_fetchList(url).then(payload => {
 			return _normalizePostsData(payload);
 		}).then(() => {
-			return usersTable;
+			resolve(usersTable);
 		});
 	});
 }

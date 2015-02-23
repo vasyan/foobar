@@ -7,6 +7,7 @@ var Reflux = require('reflux');
 
 module.exports = Reflux.createActions([
   "getPosts",
-  "setSortBy"
+  "setSortBy",
+  "loadUsersFromUrl"
 ]);
 

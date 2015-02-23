@@ -17,15 +17,15 @@ var Post = React.createClass({
 		return (
 			<div className="post cf">
 				<div className="post-link">
-					<a className="post-title" href={ post.url }>{ post.title }</a>
+					// <a className="post-title" href={ post.url }>{ post.title }</a>
 				</div>
 				<div className="post-info">
 					<div className="posted-by">
 						<span className="post-info-item">
-							<Link to="profile" params={{ username: post.creator }}>{ post.creator }</Link>
 						</span>
+						<p>{ post.text } </p>
 						<span className="post-info-item">
-							{ this.timeAgo(post.time) }
+							{ this.timeAgo(post.date) }
 						</span>
 						<span className="post-info-item">
 						</span>
