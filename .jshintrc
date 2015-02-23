@@ -16,5 +16,8 @@
   "strict": false,
   "trailing": true,
   "smarttabs": true,
-  "white": true
+  "white": true,
+  "global": [
+    "document": true
+  ]
 }
