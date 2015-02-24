@@ -1,6 +1,8 @@
 {
   "name": "hunt",
   "version": "0.1.0",
-  "dependencies": {}
+  "dependencies": {
+  	"skeleton": "2.0.x"
+  }
 }
 
