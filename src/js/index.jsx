@@ -26,7 +26,7 @@ var HuntPosts = React.createClass({
 		return (
 			<div className="wrapper full-height">
 				<header>
-					<h3>Header here!</h3>
+					<h3>Find your destiny.</h3>
 				</header>
 				<main className="js-main-container">
 					<RouteHandler { ...this.props }/>
