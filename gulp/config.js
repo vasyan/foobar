@@ -29,7 +29,10 @@ module.exports = {
     outputName: 'index.js',
   },
   html: {
-    src: 'src/index.html',
+    src: [
+      'src/index.html',
+      'src/markdown.html'
+    ],
     dest: dest
   },
   watch: {
