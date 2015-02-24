@@ -19,9 +19,10 @@ var Posts = React.createClass({
 	getInitialState: function() {
 		var postsData = postsStore.getDefaultData();
 		return {
-			loading: true,
+			loading: false,
 			posts: postsData.posts,
 			sortOptions: postsData.sortOptions,
+			filterOptions: postsData.filterOptions,
 			nextPage: postsData.nextPage,
 			currentPage: postsData.currentPage
 		};
@@ -48,6 +49,7 @@ var Posts = React.createClass({
 			loading: false,
 			posts: postsData.posts,
 			sortOptions: postsData.sortOptions,
+			filterOptions: postsData.filterOptions,
 			nextPage: postsData.nextPage,
 			currentPage: postsData.currentPage
 		});
@@ -71,6 +73,25 @@ var Posts = React.createClass({
 		}
 	},
 
+	updateFilterBy: function(event) {
+		event.preventDefault();
+
+		var currentPage = this.state.currentPage || 1;
+
+		actions.setFilterBy(this.refs.filterBy.getDOMNode().value);
+		this.setState({
+			loading: true
+		});
+
+		// if (currentPage === 1) {
+		// 	actions.stopListeningToPosts();
+		// 	actions.listenToPosts(currentPage);
+		// } else {
+		// 	this.transitionTo('posts', { pageNum: 1 });
+		// }
+
+	},
+
 	onNewSearch: function() {
 		var url = this.refs.urlInput.getDOMNode().value;
 		actions.loadUsersFromUrl(url);
@@ -80,6 +101,8 @@ var Posts = React.createClass({
 		var posts = this.state.posts;
 		var currentPage = this.state.currentPage || 1;
 		var sortOptions = this.state.sortOptions;
+		var filterOptions = this.state.filterOptions;
+		var filterValues = Object.keys(filterOptions.values);
 		// possible sort values (defined in postsStore)
 		var sortValues = Object.keys(sortOptions.values);
 
@@ -93,11 +116,14 @@ var Posts = React.createClass({
 			return <option value={ sortOptions[i] } key={ i }>{ optionText }</option>;
 		});
 
+		var filterOptions = filterValues.map((text, i) => {
+			return <option value={ filterOptions[i] } key={ i }>{ text }</option>;
+		});
+
 		return (
 			<div className="content full-width">
 				<input ref="urlInput" type="text" placeholder="Public url"/>
 				<button onClick={ this.onNewSearch }>Search</button>
-				<label htmlFor="sortby-select" className="sortby-label">Sort by </label>
 				<div className="sortby">
 					<select
 						id="sortby-select"
@@ -106,6 +132,15 @@ var Posts = React.createClass({
 						value={ sortOptions.currentValue }
 						ref="sortBy">
 						{ options }
+					</select>
+				</div>
+				<div className="filterBy">
+					<select
+						className="js-posts-filter-sex-select"
+						onChange={ this.updateFilterBy }
+						value={ filterOptions.currentValue }
+						ref="filterBy">
+						{ filterOptions }
 					</select>
 				</div>
 				<hr />

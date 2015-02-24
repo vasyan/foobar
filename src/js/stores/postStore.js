@@ -7,7 +7,7 @@ var actions = require('../actions/actions');
 var vkapi = require('../services/vkapi');
 var _ = require('underscore');
 
-var postsPerPage = 8;
+var postsPerPage = 20;
 
 var postsStore = Reflux.createStore({
 
@@ -18,6 +18,14 @@ var postsStore = Reflux.createStore({
 		this.users = {};
 		this.currentPage = 1;
 		this.nextPage = true;
+		this.filterOptions = {
+			currentValue: 'all',
+			values: {
+				'all': 'all',
+				'men': 2,
+				'women': 1
+			}
+		};
 		this.sortOptions = {
 			currentValue: 'newest',
 			values: {
@@ -29,6 +37,17 @@ var postsStore = Reflux.createStore({
 
 	setSortBy: function(value) {
 		this.sortOptions.currentValue = value;
+	},
+
+	setFilterBy: function(value) {
+		this.filterOptions.currentValue = value;
+
+		//TODO rewrite
+
+		var filteredPosts = this.posts.filter((post) => {
+			return post.sex === this.filterOptions.values[value];
+		});
+		this.trigger(_.extend(this._getThisData(), { posts: filteredPosts }));
 	},
 
 	listenToPosts: function(pageNum) {
@@ -60,32 +79,24 @@ var postsStore = Reflux.createStore({
 		// slice off extra post
 		this.posts = posts.slice(0, endAt);
 
-		this.trigger({
-			posts: this.posts,
-			currentPage: this.currentPage,
-			nextPage: this.nextPage,
-			sortOptions: this.sortOptions
-		});
+		this.trigger(this._getThisData());
 	},
 
 	getDefaultData: function() {
-		return {
-			posts: this.posts,
-			currentPage: this.currentPage,
-			nextPage: this.nextPage,
-			sortOptions: this.sortOptions
-		};
+		return this._getThisData();
 	},
 
 	loadUsersFromUrl: function(url) {
 		console.log("Load users from url");
+		this.posts = this.extractPosts();
 		vkapi.fetchActiveUsers(url).then((usersTable) => {
 			this.users = usersTable;
 			this.trigger({
-				posts: this.extractPosts(),
+				posts: this.posts,
 				currentPage: this.currentPage,
 				nextPage: this.nextPage,
-				sortOptions: this.sortOptions
+				sortOptions: this.sortOptions,
+				filterOptions: this.filterOptions
 			});
 
 			return true;
@@ -94,17 +105,27 @@ var postsStore = Reflux.createStore({
 		});
 	},
 
-	extractPosts: function() {
+	extractPosts: function(options = {}) {
 		var posts = [],
 			post;
 		_.forEach(this.users, (user) => {
 			post = _.first(user.posts);
 			if (post) {
-				posts.push(post);
+				posts.push(_.extend({}, post, { sex: user.sex }));
 			}
 		});
 
 		return posts;
+	},
+
+	_getThisData: function() {
+		return {
+			posts: this.posts,
+			currentPage: this.currentPage,
+			nextPage: this.nextPage,
+			sortOptions: this.sortOptions,
+			filterOptions: this.filterOptions
+		};
 	}
 
 });
