@@ -1,5 +1,5 @@
 var dest = "./dist";
-var src = './src';
+var src = "./src";
 
 module.exports = {
   server: {
