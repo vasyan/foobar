@@ -92,7 +92,7 @@ var postsStore = Reflux.createStore({
 		vkapi.fetchActiveUsers(url).then((usersTable) => {
 			this.users = usersTable;
 			this.trigger({
-				posts: this.posts,
+				posts: this.extractPosts(),
 				currentPage: this.currentPage,
 				nextPage: this.nextPage,
 				sortOptions: this.sortOptions,
