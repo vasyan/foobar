@@ -1,4 +1,3 @@
-var $ = require('jquery');
 var React = require('react/addons');
 var Reflux  = require('reflux');
 
@@ -24,14 +23,7 @@ var HuntPosts = React.createClass({
 		var cx = React.addons.classSet;
 
 		return (
-			<div className="wrapper full-height">
-				<header>
-					<h3>Find your destiny.</h3>
-				</header>
-				<main className="js-main-container">
-					<RouteHandler { ...this.props }/>
-				</main>
-			</div>
+			<RouteHandler { ...this.props }/>
 		)
 	}
 });

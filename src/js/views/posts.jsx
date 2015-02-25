@@ -121,46 +121,54 @@ var Posts = React.createClass({
 		});
 
 		return (
-			<div className="content full-width">
-				<input ref="urlInput" type="text" placeholder="Public url"/>
-				<button
-					onClick={ this.onNewSearch }
-					className="button-primary">
-					Search
-				</button>
-				<div className="sortby">
-					<select
-						id="sortby-select"
-						className="sortby-select"
-						onChange={ this.updateSortBy }
-						value={ sortOptions.currentValue }
-						ref="sortBy">
-						{ options }
-					</select>
-				</div>
-				<div className="filterBy">
-					<select
-						className="js-posts-filter-sex-select"
-						onChange={ this.updateFilterBy }
-						value={ filterOptions.currentValue }
-						ref="filterBy">
-						{ filterOptions }
-					</select>
-				</div>
-				<hr />
-				<div className="posts">
-					{ this.state.loading ? <Spinner /> : posts }
-				</div>
-				<hr />
-				<nav className="pagination">
-					{
-						this.state.nextPage ?
-							<Link to="posts" params={{ pageNum: currentPage + 1 }} className="next-page">
-								Load More Posts
-							</Link>
-						  : 'No More Posts'
-					}
-				</nav>
+			<div className="posts-wrapper container">
+				<section className="post-finder-dashboard row">
+					<div className="five columns">
+						<label className="label">Public url</label>
+						<input ref="urlInput" className="public-url-input u-full-width" type="text" placeholder="http://vk.com/public_name"/>
+					</div>
+					<div className="three columns sex-filter-container">
+						<select
+							className="js-posts-filter-sex-select u-full-width"
+							onChange={ this.updateFilterBy }
+							value={ filterOptions.currentValue }
+							ref="filterBy">
+							{ filterOptions }
+						</select>
+					</div>
+					<div className="three columns search-button-container">
+						<button
+							onClick={ this.onNewSearch }
+							className="button-primary u-full-width">
+							Search
+						</button>
+					</div>
+					{/* <div className="sortby">
+						<select
+							id="sortby-select"
+							className="sortby-select"
+							onChange={ this.updateSortBy }
+							value={ sortOptions.currentValue }
+							ref="sortBy">
+							{ options }
+						</select>
+					</div> */}
+				</section>
+				<section className="post-feed">
+					<div className="post-item-container row">
+						{ this.state.loading ? <Spinner /> : posts }
+					</div>
+					<hr />
+					<nav className="pagination">
+						{
+							this.state.nextPage ?
+								<Link to="posts" params={{ pageNum: currentPage + 1 }} className="next-page">
+									Load More Posts
+								</Link>
+							: 'No More Posts'
+						}
+					</nav>
+				</section>
 			</div>
 		);
 	}
