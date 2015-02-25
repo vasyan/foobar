@@ -123,7 +123,11 @@ var Posts = React.createClass({
 		return (
 			<div className="content full-width">
 				<input ref="urlInput" type="text" placeholder="Public url"/>
-				<button onClick={ this.onNewSearch }>Search</button>
+				<button
+					onClick={ this.onNewSearch }
+					className="button-primary">
+					Search
+				</button>
 				<div className="sortby">
 					<select
 						id="sortby-select"
