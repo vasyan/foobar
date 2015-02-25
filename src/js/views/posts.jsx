@@ -155,9 +155,7 @@ var Posts = React.createClass({
 					</div> */}
 				</section>
 				<section className="post-feed">
-					<div className="post-item-container row">
-						{ this.state.loading ? <Spinner /> : posts }
-					</div>
+					{ this.state.loading ? <Spinner /> : posts }
 					<hr />
 					<nav className="pagination">
 						{

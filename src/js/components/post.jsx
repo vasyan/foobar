@@ -24,12 +24,12 @@ var Post = React.createClass({
 					<a href="#" className="button u-full-width">Profile</a>
 					<a href="#" className="button u-full-width">Post</a>
 				</div>
-				<div className="post-info">
+				<div className="post-text-section nine columns">
 					<div className="posted-by">
 						<span className="post-info-item">
 						</span>
-						<p>{ post.text } </p>
-						<span className="post-info-item">
+						<p dangerouslySetInnerHTML={{__html: post.text}}></p>
+						<span className="post-info-time-ago">
 							{ this.timeAgo(post.date) }
 						</span>
 						<span className="post-info-item">
