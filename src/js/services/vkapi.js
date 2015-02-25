@@ -64,7 +64,7 @@ function _getAuthorsInfo(authors) {
 		$.ajax({
 			type:"GET",
 			dataType:"jsonp",
-			url: "https://api.vk.com/method/users.get?fields=sex&uids=" + authors,
+			url: "https://api.vk.com/method/users.get?fields=sex,photo_big&uids=" + authors,
 			success(data) {
 				resolve(data.response);
 			},
@@ -99,7 +99,7 @@ function _fetchList(publicId) {
 		$.ajax({
 			type:"GET",
 			dataType:"jsonp",
-			url: "https://api.vk.com/method/wall.get?domain=" + publicId,
+			url: "https://api.vk.com/method/wall.get?count=100&domain=" + publicId,
 			success(data) {
 				resolve(data.response);
 			},

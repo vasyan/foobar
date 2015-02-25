@@ -20,7 +20,7 @@ var Post = React.createClass({
 					<a className="post-title" href={ post.url }>{ post.title }</a>
 				</div>*/}
 				<div className="three columns profile-photo-container">
-					<img className="profile-photo u-full-width" src="http://lorempixel.com/g/205/200/people/" alt="photo"/>
+					<img className="profile-photo u-full-width" src={post.photo} alt="photo"/>
 					<a href="#" className="button u-full-width">Profile</a>
 					<a href="#" className="button u-full-width">Post</a>
 				</div>
@@ -30,7 +30,7 @@ var Post = React.createClass({
 						</span>
 						<p dangerouslySetInnerHTML={{__html: post.text}}></p>
 						<span className="post-info-time-ago">
-							{ this.timeAgo(post.date) }
+							{ this.timeAgo(post.date * 1000) }
 						</span>
 						<span className="post-info-item">
 						</span>

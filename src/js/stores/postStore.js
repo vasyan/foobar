@@ -7,7 +7,7 @@ var actions = require('../actions/actions');
 var vkapi = require('../services/vkapi');
 var _ = require('underscore');
 
-var postsPerPage = 20;
+var postsPerPage = 50;
 
 var postsStore = Reflux.createStore({
 
@@ -111,7 +111,7 @@ var postsStore = Reflux.createStore({
 		_.forEach(this.users, (user) => {
 			post = _.first(user.posts);
 			if (post) {
-				posts.push(_.extend({}, post, { sex: user.sex }));
+				posts.push(_.extend({}, post, { sex: user.sex, photo: user.photo_big }));
 			}
 		});
 
