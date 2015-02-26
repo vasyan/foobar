@@ -19,11 +19,11 @@ var postsStore = Reflux.createStore({
 		this.currentPage = 1;
 		this.nextPage = true;
 		this.filterOptions = {
-			currentValue: 'all',
+			currentValue: 'All',
 			values: {
-				'all': 'all',
-				'men': 2,
-				'women': 1
+				'All': 'All',
+				'Men': 2,
+				'Women': 1
 			}
 		};
 		this.sortOptions = {
@@ -41,13 +41,23 @@ var postsStore = Reflux.createStore({
 
 	setFilterBy: function(value) {
 		this.filterOptions.currentValue = value;
+		var filteredPosts = this.getFilteredPosts(value);
 
-		//TODO rewrite
-
-		var filteredPosts = this.posts.filter((post) => {
-			return post.sex === this.filterOptions.values[value];
-		});
 		this.trigger(_.extend(this._getThisData(), { posts: filteredPosts }));
+	},
+
+	getFilteredPosts: function(value = this.filterOptions.currentValue) {
+		var filteredPosts;
+		//TODO rewrite
+		if (value !== "All") {
+			filteredPosts = this.posts.filter((post) => {
+				return post.sex === this.filterOptions.values[value];
+			});
+		} else {
+			filteredPosts = this.posts;
+		}
+
+		return filteredPosts;
 	},
 
 	listenToPosts: function(pageNum) {
@@ -88,11 +98,11 @@ var postsStore = Reflux.createStore({
 
 	loadUsersFromUrl: function(url) {
 		console.log("Load users from url");
-		this.posts = this.extractPosts();
 		vkapi.fetchActiveUsers(url).then((usersTable) => {
 			this.users = usersTable;
+			this.posts = this.extractPosts();
 			this.trigger({
-				posts: this.extractPosts(),
+				posts: this.getFilteredPosts(),
 				currentPage: this.currentPage,
 				nextPage: this.nextPage,
 				sortOptions: this.sortOptions,
