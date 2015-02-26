@@ -94,7 +94,6 @@ function _getAuthorsInfo(authors) {
 function _fetchList(publicId) {
 	// localStorage.setItem(localStorageKey, JSON.stringify(postsList));
 	// if we used a real database, we would likely do the below in a callback
-	publicId = publicId || "lovekld39";
 	return new Promise((resolve, reject) => {
 		$.ajax({
 			type:"GET",

@@ -94,7 +94,15 @@ var Posts = React.createClass({
 
 	onNewSearch: function() {
 		var url = this.refs.urlInput.getDOMNode().value;
-		actions.loadUsersFromUrl(url);
+		if (url) url = url.match(/\/([\w\d]+)$/)[1];
+		actions.loadUsersFromUrl(url || "lovekld39");
+	},
+
+	handleNewSearch() {
+		var url = this.refs.urlInput.getDOMNode().value;
+		if (url) url = url.match(/\/([\w\d]+)$/)[1];
+		console.log("Handle new search", url);
+		PostsActions.getPosts(url);
 	},
 
 	render: function() {
