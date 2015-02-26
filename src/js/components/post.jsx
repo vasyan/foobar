@@ -20,21 +20,21 @@ var Post = React.createClass({
 					<a className="post-title" href={ post.url }>{ post.title }</a>
 				</div>*/}
 				<div className="three columns profile-photo-container">
-					<img className="profile-photo u-full-width" src={post.photo} alt="photo"/>
+					<img className="profile-photo u-full-width" src={ post.photo } alt="photo"/>
 					<a href="#" className="button u-full-width">Profile</a>
 					<a href="#" className="button u-full-width">Post</a>
 				</div>
 				<div className="post-text-section nine columns">
-					<div className="posted-by">
-						<span className="post-info-item">
-						</span>
-						<p dangerouslySetInnerHTML={{__html: post.text}}></p>
+					<a href={ "https://vk.com/" + post.signer_id }>{ post.authorName }</a>
+						<p dangerouslySetInnerHTML={{ __html: post.text }}></p>
+						{ post.attachment && post.attachment.photo ?
+							<img className="attachment-photo u-max-full-width" src={ post.attachment.photo.src_big }/>
+							: '' }
 						<span className="post-info-time-ago">
 							{ this.timeAgo(post.date * 1000) }
 						</span>
 						<span className="post-info-item">
 						</span>
-					</div>
 				</div>
 			</div>
 		);

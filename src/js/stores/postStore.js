@@ -111,7 +111,11 @@ var postsStore = Reflux.createStore({
 		_.forEach(this.users, (user) => {
 			post = _.first(user.posts);
 			if (post) {
-				posts.push(_.extend({}, post, { sex: user.sex, photo: user.photo_big }));
+				posts.push(_.extend({}, post, {
+					sex: user.sex,
+					authorName: user.first_name + " " + user.last_name,
+					photo: user.photo_big
+				}));
 			}
 		});
 
