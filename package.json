@@ -21,7 +21,9 @@
     "moment": "^2.8.4",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
-    "watchify": "^2.3.0"
+    "watchify": "^2.3.0",
+    "react-waypoint": "0.3.0",
+    "gulp-autoprefixer": "2.1.0"
   },
   "scripts": {
     "start": "node server.js",
