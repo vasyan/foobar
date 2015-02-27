@@ -20,6 +20,7 @@ var postsStore = Reflux.createStore({
 		this.url = "";
 		this.nextPage = true;
 		this.offset = 0;
+		this.loaded = false;
 		this.filterOptions = {
 			currentValue: 'All',
 			values: {
@@ -106,12 +107,14 @@ var postsStore = Reflux.createStore({
 	loadUsersFromUrl: function(url=this.url) {
 		this.url = url;
 		console.log("Load users from url");
+		this.trigger(_.extend(this._getThisData(), { loading: true }));
 		vkapi.fetchActiveUsers({ url: url, offset: this.offset }).then((usersTable) => {
 			this.users = usersTable;
 			this.posts = this.extractPosts();
 			this.trigger({
 				posts: this.getFilteredPosts(),
 				currentPage: this.currentPage,
+				loaded: true,
 				nextPage: this.nextPage,
 				sortOptions: this.sortOptions,
 				filterOptions: this.filterOptions

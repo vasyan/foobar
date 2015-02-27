@@ -9,6 +9,7 @@ module.exports = Reflux.createActions([
   "getPosts",
   "setSortBy",
   "loadUsersFromUrl",
-  "setFilterBy"
+  "setFilterBy",
+  "loadMoarPosts"
 ]);
 

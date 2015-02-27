@@ -5,6 +5,7 @@ var Reflux     = require('reflux');
 var actions    = require('../actions/actions');
 var postsStore = require('../stores/postStore');
 var Spinner    = require('../components/spinner.jsx');
+var Waypoint   = require('react-waypoint');
 var Post       = require('../components/post.jsx');
 var Router     = require('react-router');
 var Link       = Router.Link;
@@ -20,6 +21,7 @@ var Posts = React.createClass({
 		var postsData = postsStore.getDefaultData();
 		return {
 			loading: false,
+			loaded: false,
 			posts: postsData.posts,
 			sortOptions: postsData.sortOptions,
 			filterOptions: postsData.filterOptions,
@@ -41,12 +43,13 @@ var Posts = React.createClass({
 	// },
 
 	onStoreUpdate: function(postsData) {
-		if (!postsData.posts.length) {
-			// if no posts are returned
-			this.transitionTo('home');
-		}
+		// if (!postsData.posts.length) {
+		// 	// if no posts are returned
+		// 	this.transitionTo('home');
+		// }
 		this.setState({
 			loading: false,
+			loaded: postsData.loaded,
 			posts: postsData.posts,
 			sortOptions: postsData.sortOptions,
 			filterOptions: postsData.filterOptions,
@@ -90,6 +93,13 @@ var Posts = React.createClass({
 		// 	this.transitionTo('posts', { pageNum: 1 });
 		// }
 
+	},
+
+	loadMoarPosts: function() {
+		if (this.state.loaded) {
+			this.setState({ loading: true });
+			actions.loadMoarPosts();
+		}
 	},
 
 	onNewSearch: function() {
@@ -163,18 +173,12 @@ var Posts = React.createClass({
 					</div> */}
 				</section>
 				<section className="post-feed">
-					{ this.state.loading ? <Spinner /> : posts }
+					{ posts }
+					{ this.state.loading ? <Spinner/> : "" }
 					<hr />
-					<nav className="pagination">
-						{
-							this.state.nextPage ?
-								<Link to="posts" params={{ pageNum: currentPage + 1 }} className="next-page">
-									Load More Posts
-								</Link>
-							: 'No More Posts'
-						}
-					</nav>
+					<Waypoint onEnter={ this.loadMoarPosts }/>
 				</section>
+
 			</div>
 		);
 	}
