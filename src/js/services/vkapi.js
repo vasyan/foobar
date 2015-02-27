@@ -3,7 +3,7 @@ var $ = require('jquery');
 var _ = require('underscore');
 
 function getPosts(options) {
-	_fetchList(options.url).then();
+	_fetchList(options).then();
 }
 
 // function _getPosts(publicId) {
@@ -91,14 +91,18 @@ function _getAuthorsInfo(authors) {
 // }
 
 	// called whenever we change a list. normally this would mean a database API call
-function _fetchList(publicId) {
+function _fetchList(options) {
 	// localStorage.setItem(localStorageKey, JSON.stringify(postsList));
 	// if we used a real database, we would likely do the below in a callback
+	var options = options;
 	return new Promise((resolve, reject) => {
+		var url = "https://api.vk.com/method/wall.get?count=100&offset=" +
+			options.offset + "&domain=" + options.url;
+
 		$.ajax({
 			type:"GET",
 			dataType:"jsonp",
-			url: "https://api.vk.com/method/wall.get?count=100&domain=" + publicId,
+			url: url,
 			success(data) {
 				resolve(data.response);
 			},
@@ -111,9 +115,9 @@ function _fetchList(publicId) {
 	// this.trigger(postsList); // sends the updated list to all listening components (PostApp)
 }
 
-function _fetchActiveUsers(url) {
+function _fetchActiveUsers(options) {
 	return new Promise((resolve, reject) => {
-		_fetchList(url).then(payload => {
+		_fetchList(options).then(payload => {
 			return _normalizePostsData(payload);
 		}).then(() => {
 			resolve(usersTable);
