@@ -9,6 +9,7 @@ var Waypoint   = require('react-waypoint');
 var Post       = require('../components/post.jsx');
 var Router     = require('react-router');
 var Link       = Router.Link;
+var _          = require('underscore');
 
 var Posts = React.createClass({
 
@@ -20,13 +21,14 @@ var Posts = React.createClass({
 	getInitialState: function() {
 		var postsData = postsStore.getDefaultData();
 		return {
-			loading: false,
-			loaded: false,
-			posts: postsData.posts,
-			sortOptions: postsData.sortOptions,
-			filterOptions: postsData.filterOptions,
-			nextPage: postsData.nextPage,
-			currentPage: postsData.currentPage
+			isLoading: false,
+			isloaded: false,
+			posts: postsData.currentPuclicData.posts,
+			users: postsData.currentPuclicData.users,
+			sortOptions: postsData.settings.sortOptions,
+			filterOptions: postsData.settings.filterOptions,
+			nextPage: postsData.settings.nextPage,
+			currentPage: postsData.settings.currentPage
 		};
 	},
 
@@ -48,13 +50,14 @@ var Posts = React.createClass({
 		// 	this.transitionTo('home');
 		// }
 		this.setState({
-			loading: false,
-			loaded: postsData.loaded,
-			posts: postsData.posts,
-			sortOptions: postsData.sortOptions,
-			filterOptions: postsData.filterOptions,
-			nextPage: postsData.nextPage,
-			currentPage: postsData.currentPage
+			isLoading: false,
+			isLoaded: postsData.settings.isLoaded,
+			posts: postsData.currentPuclicData.posts,
+			users: postsData.currentPuclicData.users,
+			sortOptions: postsData.settings.sortOptions,
+			filterOptions: postsData.settings.filterOptions,
+			nextPage: postsData.settings.nextPage,
+			currentPage: postsData.settings.currentPage
 		});
 	},
 
@@ -65,7 +68,7 @@ var Posts = React.createClass({
 		actions.setSortBy(this.refs.sortBy.getDOMNode().value);
 
 		this.setState({
-			loading: true
+			isLoading: true
 		});
 
 		if (currentPage === 1) {
@@ -83,7 +86,7 @@ var Posts = React.createClass({
 
 		actions.setFilterBy(this.refs.filterBy.getDOMNode().value);
 		this.setState({
-			loading: true
+			isLoading: true
 		});
 
 		// if (currentPage === 1) {
@@ -96,8 +99,8 @@ var Posts = React.createClass({
 	},
 
 	loadMoarPosts: function() {
-		if (this.state.loaded) {
-			this.setState({ loading: true });
+		if (this.state.isLoaded) {
+			this.setState({ isLoading: true });
 			actions.loadMoarPosts();
 		}
 	},
@@ -105,37 +108,35 @@ var Posts = React.createClass({
 	onNewSearch: function() {
 		var url = this.refs.urlInput.getDOMNode().value;
 		if (url) url = url.match(/\/([\w\d]+)$/)[1];
-		actions.loadUsersFromUrl(url || "lovekld39");
-	},
-
-	handleNewSearch() {
-		var url = this.refs.urlInput.getDOMNode().value;
-		if (url) url = url.match(/\/([\w\d]+)$/)[1];
-		console.log("Handle new search", url);
-		PostsActions.getPosts(url);
+		actions.loadUsersFromUrl( url || "lovekld39" );
 	},
 
 	render: function() {
-		var posts = this.state.posts;
-		var currentPage = this.state.currentPage || 1;
-		var sortOptions = this.state.sortOptions;
-		var filterOptions = this.state.filterOptions;
-		var filterValues = Object.keys(filterOptions.values);
-		// possible sort values (defined in postsStore)
-		var sortValues = Object.keys(sortOptions.values);
+		var posts = this.state.posts,
+			currentPage = this.state.currentPage || 1,
+			sortOptions = this.state.sortOptions,
+			filterOptions = this.state.filterOptions,
+			filterValues = Object.keys(filterOptions.values),
+			sortValues = Object.keys(sortOptions.values),
+			users = this.state.users;
 
 		posts = posts.map(function(post) {
+			if ( !_.isObject(post) ) return;
 			return (
-				<Post post={ post } key={ post.id } />
+				<Post
+					post={ post }
+					filterBy={ filterOptions.values[filterOptions.currentValue] }
+					user={ users[ post.signer_id ] }
+					key={ post.id } />
 			);
 		});
 
 		var options = sortValues.map(function(optionText, i) {
-			return <option value={ sortOptions[i] } key={ i }>{ optionText }</option>;
+			return <option value={ sortOptions[ i ] } key={ i }>{ optionText }</option>;
 		});
 
 		var filterOptions = filterValues.map((text, i) => {
-			return <option value={ filterOptions[i] } key={ i }>{ text }</option>;
+			return <option value={ filterOptions[ i ] } key={ i }>{ text }</option>;
 		});
 
 		return (
@@ -174,7 +175,7 @@ var Posts = React.createClass({
 				</section>
 				<section className="post-feed">
 					{ posts }
-					{ this.state.loading ? <Spinner/> : "" }
+					{ this.state.isLoading ? <Spinner/> : "" }
 					<hr />
 					<Waypoint onEnter={ this.loadMoarPosts }/>
 				</section>

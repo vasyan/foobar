@@ -1,29 +1,31 @@
 var usersTable = {};
-var $ = require('jquery');
 var _ = require('underscore');
+var $ = require('jquery');
 
-function getPosts(options) {
-	_fetchList(options).then();
-}
+var usersFields = [
+	"bdate",
+	"sex",
+	"photo_big"
+].join(",");
 
-// function _getPosts(publicId) {
-// 	// var loadedList =
-// 	var loadedList = _fetchList(publicId);
+var usersIdCache = [],
+	usersCache = {},
+	postsCache = [];
 
-// 	loadedList.then((posts) => {
-// 		_normalizePostsData(posts).then(() => {
+var _extractUsersIds = function( posts ) {
+	var id,
+		cache = usersIdCache;
+	_.forEach(posts, ( post ) => {
+		id = post.signer_id;
+		if ( id && cache.indexOf(id) === -1) {
+			cache.push( id );
+		}
+	});
 
-// 			}
-// 		);
-// 		// self.isLoading = false;
-// 		// self.trigger(posts);
-// 	}).catch((err) => {
-// 		console.log("Error", err);
-// 	});
+	return usersIdCache;
+};
 
-// }
-
-function _normalizePostsData(payload) {
+var _normalizePostsData = function( payload ) {
 	var id;
 
 	_.forEach(payload, (item) => {
@@ -48,7 +50,7 @@ function _normalizePostsData(payload) {
 	// });
 
 	return new Promise((resolve, reject) => {
-		_getAuthorsInfo(_.keys(usersTable)).then((infoList) => {
+		_getAuthorsInfo().then((infoList) => {
 			_.forEach(infoList, (item) => {
 				_.extend(usersTable[item.uid], item);
 			});
@@ -56,42 +58,35 @@ function _normalizePostsData(payload) {
 		});
 	});
 
-}
+};
 
-function _getAuthorsInfo(authors) {
-	authors = authors.join(",");
-	return new Promise((resolve, reject) => {
-		$.ajax({
-			type:"GET",
-			dataType:"jsonp",
-			url: "https://api.vk.com/method/users.get?fields=sex,photo_big&uids=" + authors,
-			success(data) {
-				resolve(data.response);
-			},
-			error(err) {
-				reject(err);
-			}
+var _getAuthorsInfo = function( authors ) {
+
+	if (authors.length) {
+		authors = authors.join(",");
+		return new Promise(( resolve, reject ) => {
+			$.ajax({
+				type:"GET",
+				dataType:"jsonp",
+				url: "https://api.vk.com/method/users.get?fields=" + usersFields + "&uids=" + authors,
+				success(data) {
+					resolve(data.response);
+				},
+				error(err) {
+					reject(err);
+				}
+			});
 		});
-	});
-}
+	} else {
+		return new Promise(( resolve, reject ) => {
+			resolve();
+		});
+	}
 
-// function _updateUserTable(payload, emit = false) {
-// 	_.extend(usersTable, payload);
-// 	if (emit) trigger(usersTable);
-// };
-
-// function _filterPosts(options) {
-// 	if (!_.isUndefined(options.sex)) {
-// 		return _.pick(usersTable, (value) => {
-// 			return value.sex === options.sex;
-// 		});
-// 	} else {
-// 		return usersTable;
-// 	}
-// }
+};
 
 	// called whenever we change a list. normally this would mean a database API call
-function _fetchList(options) {
+var _fetchList = function( options ) {
 	// localStorage.setItem(localStorageKey, JSON.stringify(postsList));
 	// if we used a real database, we would likely do the below in a callback
 	var options = options;
@@ -113,18 +108,32 @@ function _fetchList(options) {
 	});
 	// postsList = postsList;
 	// this.trigger(postsList); // sends the updated list to all listening components (PostApp)
-}
+};
 
-function _fetchActiveUsers(options) {
+var _normalizeUsers = function ( users ) {
+	_.forEach( users, ( user ) => {
+		usersCache[ user['uid'] ] = user;
+	});
+};
+
+var fetchPostsAndUsers = function( options ) {
 	return new Promise((resolve, reject) => {
 		_fetchList(options).then(payload => {
-			return _normalizePostsData(payload);
-		}).then(() => {
-			resolve(usersTable);
+			// return _normalizePostsData(payload);
+			postsCache = payload;
+			var authorsIds = _extractUsersIds( payload );
+
+			return _getAuthorsInfo(authorsIds);
+		}).then((users) => {
+			_normalizeUsers( users );
+			resolve({
+				users: usersCache,
+				posts: postsCache
+			});
 		});
 	});
-}
+};
 
 module.exports = {
-  fetchActiveUsers: _fetchActiveUsers
+  fetchPostsAndUsers
 };
