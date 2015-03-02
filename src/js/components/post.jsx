@@ -12,7 +12,8 @@ var Post = React.createClass({
 	],
 
 	render: function() {
-		var post = this.props.post;
+		var post = this.props.post,
+			userAge = this.timeAgo(post.b)
 
 		return (
 			<div className="post-item-container row">
@@ -25,7 +26,7 @@ var Post = React.createClass({
 					<a href="#" className="button u-full-width">Post</a>
 				</div>
 				<div className="post-text-section nine columns">
-					<a href={ "https://vk.com/" + post.signer_id }>{ post.authorName }</a>
+					<a href={ "https://vk.com/id" + post.signer_id }>{ post.authorName }</a>
 						<p dangerouslySetInnerHTML={{ __html: post.text }}></p>
 						{ post.attachment && post.attachment.photo ?
 							<img className="attachment-photo u-max-full-width" src={ post.attachment.photo.src_big }/>
