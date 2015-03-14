@@ -19,7 +19,7 @@ var Post = React.createClass({
 	render: function() {
 		var post = this.props.post,
 			user = this.props.user || anonUser,
-			userAge = this.timeAgo(post.b)
+			userAge = this.timeAgo(post.b);
 
 		if ( this.props.filterBy !== 'All' && user.sex !== this.props.filterBy ) return null;
 
