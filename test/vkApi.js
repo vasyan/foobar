@@ -1,16 +1,25 @@
 var assert = require('chai').assert;
 var vkApi = require('../app/services/vk');
+var request = require('superagent');
+var sinon = require('sinon');
 
-describe('Vk api service', function() {
-	it('should have a getDataFromPublic method', function () {
-		assert.typeOf( vkApi, 'object' );
-		assert.typeOf( vkApi.getDataFromPublic, 'function' );
+
+
+suite('Vk api service', function() {
+
+	setup(function() {
+		this.request = sinon.useFakeXMLHttpRequest();
 	});
-	it('should construct url to vk method', function () {
-		assert.typeOf( vkApi._getMethodUrl, 'function' );
-		assert.equal( vkApi._getMethodUrl('wall.get'),
-			'https://api.vk.com/method/wall.get?count=100&offset=0&domain=lovelkld39');
-		assert.equal( vkApi._getMethodUrl('user.get'),
-			'https://api.vk.com/method/user.get?fields=bdate,sex,photo_big');
+
+	test('should spy itself', function () {
+
+		request.get = function(url, fn) {
+			console.log("message");
+			expect(url).to.be('https://api.vk.com/wall.get');
+			// fn();
+		};
+
+		vkApi.getDataFromPublic();
+
 	});
 });
