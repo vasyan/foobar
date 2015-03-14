@@ -25,41 +25,6 @@ var _extractUsersIds = function( posts ) {
 	return usersIdCache;
 };
 
-var _normalizePostsData = function( payload ) {
-	var id;
-
-	_.forEach(payload, (item) => {
-		id = item.signer_id;
-		if(_.isNumber(id)) {
-			if (typeof usersTable[id] === "undefined") {
-				usersTable[id] = {
-					"posts": [item]
-				};
-			} else {
-				usersTable[id].posts.push(item);
-			}
-		}
-	});
-
-	// var authorsWithId = _.filter(payload, (item) => {
-	// 	id = item.signer_id;
-	// 	if (id) {
-	// 		idsForLoad.push(id);
-	// 		return typeof item.signer_id !== "undefined";
-	// 	}
-	// });
-
-	return new Promise((resolve, reject) => {
-		_getAuthorsInfo().then((infoList) => {
-			_.forEach(infoList, (item) => {
-				_.extend(usersTable[item.uid], item);
-			});
-			resolve();
-		});
-	});
-
-};
-
 var _getAuthorsInfo = function( authors ) {
 
 	if (authors.length) {
@@ -119,7 +84,6 @@ var _normalizeUsers = function ( users ) {
 var fetchPostsAndUsers = function( options ) {
 	return new Promise((resolve, reject) => {
 		_fetchList(options).then(payload => {
-			// return _normalizePostsData(payload);
 			postsCache = payload;
 			var authorsIds = _extractUsersIds( payload );
 
