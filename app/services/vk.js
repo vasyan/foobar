@@ -4,6 +4,7 @@ var	_ = require('underscore');
 var Q = require('q');
 var Firebase = require('firebase');
 var publicsRef = new Firebase('https://foxyhunt.firebaseio.com/publics');
+var colors = require('colors');
 
 var urlOptions = {
 		protocol: 'https',
@@ -25,20 +26,28 @@ var urlOptions = {
 	},
 	postCache,
 	usersCache,
+	usersIdsCache = [],
 	usersTable = {};
 
-var extractUsersIds = function( posts ) {
-	console.log('Posts --------------------------------------- ', posts);
+var _extractUsersIds = function( posts ) {
 	var id,
-		cache = usersCache;
+		cache = usersIdsCache;
 	_.forEach(posts, function( post ) {
-		id = post.signer_id;
+		if ( post['post_type'] !== 'post' ) return;
+
+		id = post['signer_id'];
 		if ( id && cache.indexOf(id) === -1) {
 			cache.push( id );
 		}
 	});
 
-	return usersCache;
+	return usersIdsCache;
+};
+
+var _normalizeUsers = function ( users ) {
+	_.forEach( users, function( user ) {
+		usersCache[ user.uid ] = user;
+	});
 };
 
 var getMethodQuery = function( method, params ) {
@@ -52,13 +61,13 @@ var getMethodQuery = function( method, params ) {
 
 var getWallPosts = function( publicName, params ) {
 
-	console.log('getWallPosts run');
+	console.log('getWallPosts run'.green);
 	var wallUrl = getMethodQuery('wall.get', params);
 	return Q.Promise(function( resolve, reject ) {
 		request.get( wallUrl , function(err, res, body) {
 			if ( !err && res.statusCode === 200) {
 				postCache = JSON.parse( body ).response.slice(1);
-				extractUsersIds( postCache );
+				_extractUsersIds( postCache );
 				resolve( postCache );
 			} else {
 				reject( err );
@@ -69,26 +78,36 @@ var getWallPosts = function( publicName, params ) {
 
 var getUsersInfo = function( users ) {
 
-	console.log('getUsersInfo run');
+	var uidsQuery = {
+		query: {
+			uids: usersIdsCache.join(',')
+		}
+	};
 
-	var usersUrl = getMethodQuery('users.get', { uids: usersCache });
+	var usersUrl = getMethodQuery('users.get', uidsQuery);
+
+	console.log('getUsersInfo run with url - '.green, usersUrl);
+
 	return Q.Promise(function( resolve, reject ) {
-		request.get( usersUrl, function( err, res ) {
+		request.get( usersUrl, function( err, res, body) {
 			if ( !err && res.statusCode === 200) {
-				usersCache = res;
-				resolve( res );
+				// console.log('Users info: '.yellow, res);
+				usersCache = JSON.parse( body ).response;
+				resolve( usersCache );
 			}
 		});
 	});
 };
 
 var getDataFromPublic = function( publicName, params ) {
-	getWallPosts( publicName, params ).then( getUsersInfo )
-		.then(function( payload ) {console.log('PAYLOAD', payload );});
+	return Q.Promise(function( resolve, reject ) {
+		getWallPosts( publicName, params )
+			.then( _.bind(  getUsersInfo, this ) )
+			.then( _.bind( _extractUsersIds, this ) );
+	});
 
 };
 
 module.exports = {
-  getDataFromPublic: getDataFromPublic,
-  getWallPosts: getWallPosts
+  getDataFromPublic: getDataFromPublic
 };
