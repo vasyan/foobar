@@ -13,7 +13,7 @@ var urlOptions = {
 	},
 	apiMethodsOptions = {
 		'wall.get': {
-			'count': 50,
+			'count': 8,
 			'offset': 0,
 			'domain': ''
 		},
@@ -86,7 +86,7 @@ var getMethodQuery = function( method, params ) {
 	}
 
 	var generatedOptions = _.extend( urlOptions,
-		{	query: query }, { pathname: 'method/' + method }
+		{	query: query }, { pathname: 'method/' + method }, params
 	);
 
 	return nodeUrl.format( generatedOptions );
