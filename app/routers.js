@@ -4,7 +4,6 @@ var vkApi = require('./services/vk');
 
 router.get('/women', function(req, res) {
 	res.json('Women');
-	console.log("message", vkApi);
 	vkApi.getDataFromPublic();
 	// 	console.log('Ten!');
 	// });
