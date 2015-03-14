@@ -4,3 +4,4 @@
 
 gulp/npm-debug.log
 .foreverignore
+app/database/firebaseConfig.js
