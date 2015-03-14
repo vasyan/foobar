@@ -3,7 +3,8 @@ var nodeUrl = require('url');
 var	_ = require('underscore');
 var Q = require('q');
 var Firebase = require('firebase');
-var publicsRef = new Firebase('https://foxyhunt.firebaseio.com/publics');
+var firebaseConfig = require('../database/firebaseConfig');
+var publicsRef = new Firebase(firebaseConfig.publicsRef);
 var colors = require('colors');
 
 var urlOptions = {
@@ -14,9 +15,9 @@ var urlOptions = {
 		'wall.get': {
 			'count': 3,
 			'offset': 0,
-			'domain': 'lovekld39'
+			'domain': ''
 		},
-		'user.get': {
+		'users.get': {
 			'fields': [
 				'bdate',
 				'sex',
@@ -25,23 +26,35 @@ var urlOptions = {
 		}
 	},
 	postCache,
-	usersCache,
+	usersCache = {},
 	usersIdsCache = [],
 	usersTable = {};
 
 var _extractUsersIds = function( posts ) {
-	var id,
-		cache = usersIdsCache;
-	_.forEach(posts, function( post ) {
-		if ( post['post_type'] !== 'post' ) return;
 
-		id = post['signer_id'];
-		if ( id && cache.indexOf(id) === -1) {
-			cache.push( id );
-		}
+	console.log('_extractUsersIds run'.green);
+
+	return Q.Promise(function( resolve ) {
+		var id,
+			cache = usersCache;
+		_.forEach(posts, function( post ) {
+			if ( post['post_type'] !== 'post' ) return;
+
+			id = post['signer_id'] || 'anon';
+
+			if ( cache[ id ] ) {
+				cache[ id ]['posts'][ post.id ] = post;
+			} else {
+				cache[ id ] = {
+					info: {},
+					posts: {}
+				};
+				cache[ id ]['posts'][ post.id ] = post;
+			}
+		});
+
+		resolve( usersCache );
 	});
-
-	return usersIdsCache;
 };
 
 var _normalizeUsers = function ( users ) {
@@ -51,9 +64,13 @@ var _normalizeUsers = function ( users ) {
 };
 
 var getMethodQuery = function( method, params ) {
+	var query = apiMethodsOptions[ method ];
+	if ( params && params.query ) {
+		_.extend( query, params.query );
+	}
+
 	var generatedOptions = _.extend( urlOptions,
-		{	query: apiMethodsOptions[ method ], pathname: 'method/' + method },
-		params
+		{	query: query }, { pathname: 'method/' + method }
 	);
 
 	return nodeUrl.format( generatedOptions );
@@ -67,7 +84,6 @@ var getWallPosts = function( publicName, params ) {
 		request.get( wallUrl , function(err, res, body) {
 			if ( !err && res.statusCode === 200) {
 				postCache = JSON.parse( body ).response.slice(1);
-				_extractUsersIds( postCache );
 				resolve( postCache );
 			} else {
 				reject( err );
@@ -78,13 +94,13 @@ var getWallPosts = function( publicName, params ) {
 
 var getUsersInfo = function( users ) {
 
+	console.log('getUsersInfo run'.green);
+
 	var uidsQuery = {
-		query: {
-			uids: usersIdsCache.join(',')
-		}
+		uids: _.keys(usersCache).join(',')
 	};
 
-	var usersUrl = getMethodQuery('users.get', uidsQuery);
+	var usersUrl = getMethodQuery('users.get', { query: uidsQuery });
 
 	console.log('getUsersInfo run with url - '.green, usersUrl);
 
@@ -100,10 +116,19 @@ var getUsersInfo = function( users ) {
 };
 
 var getDataFromPublic = function( publicName, params ) {
-	return Q.Promise(function( resolve, reject ) {
+	publicName = publicName || 'lovekld39';
+	apiMethodsOptions['wall.get']['domain'] = publicName;
+
+	return Q.Promise(function( resolve ) {
 		getWallPosts( publicName, params )
+			.then( _.bind( _extractUsersIds, this ) )
 			.then( _.bind(  getUsersInfo, this ) )
-			.then( _.bind( _extractUsersIds, this ) );
+			.then(function() {
+				new Firebase(firebaseConfig.publicsRef + '/' + publicName).set( usersCache );
+			})
+			.catch(function(err) {
+				console.log('Error was catched!'.red, err);
+			})
 	});
 
 };
