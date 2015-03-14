@@ -13,7 +13,7 @@ var urlOptions = {
 	},
 	apiMethodsOptions = {
 		'wall.get': {
-			'count': 3,
+			'count': 50,
 			'offset': 0,
 			'domain': ''
 		},
@@ -30,36 +30,52 @@ var urlOptions = {
 	usersIdsCache = [],
 	usersTable = {};
 
-var _extractUsersIds = function( posts ) {
+var _updateUsersCache = function( data ) {
 
 	console.log('_extractUsersIds run'.green);
 
 	return Q.Promise(function( resolve ) {
 		var id,
-			cache = usersCache;
-		_.forEach(posts, function( post ) {
-			if ( post['post_type'] !== 'post' ) return;
+			_usersCache = _.extend( {}, usersCache );
 
-			id = post['signer_id'] || 'anon';
+		_.forEach(data, function( item ) {
+			if ( item['post_type'] !== 'post' || !_.isNumber(item['signer_id']) ) return;
 
-			if ( cache[ id ] ) {
-				cache[ id ]['posts'][ post.id ] = post;
+			id = item['signer_id'] || 'anon';
+
+			if ( _usersCache[ id ] ) {
+				_usersCache[ id ]['posts'][ item.id ] = item;
 			} else {
-				cache[ id ] = {
+				_usersCache[ id ] = {
 					info: {},
 					posts: {}
 				};
-				cache[ id ]['posts'][ post.id ] = post;
+				_usersCache[ id ]['posts'][ item.id ] = item;
+			}
+		});
+		usersCache = _usersCache;
+
+		resolve( _usersCache );
+	});
+};
+
+var mergePostsToUsers = function( payload ) {
+
+	// console.log('MergePostsToUsers run with'.yellow);
+
+	return Q.Promise(function( resolve ) {
+		_.forEach(payload.info, function( item ) {
+			if (usersCache[ item.uid ]) {
+				usersCache[ item.uid ][ 'info' ] = item;
+			} else {
+				usersCache[ item.uid ] = {
+					info: item,
+					posts: {}
+				};
 			}
 		});
 
 		resolve( usersCache );
-	});
-};
-
-var _normalizeUsers = function ( users ) {
-	_.forEach( users, function( user ) {
-		usersCache[ user.uid ] = user;
 	});
 };
 
@@ -94,22 +110,22 @@ var getWallPosts = function( publicName, params ) {
 
 var getUsersInfo = function( users ) {
 
-	console.log('getUsersInfo run'.green);
-
-	var uidsQuery = {
-		uids: _.keys(usersCache).join(',')
-	};
-
-	var usersUrl = getMethodQuery('users.get', { query: uidsQuery });
-
-	console.log('getUsersInfo run with url - '.green, usersUrl);
-
 	return Q.Promise(function( resolve, reject ) {
+
+
+		var uidsQuery = {
+			uids: _.keys( users ).join(',')
+		};
+
+		console.log('getUsersInfo run'.green, _.size( users ) );
+
+		var usersUrl = getMethodQuery('users.get', { query: uidsQuery });
+
 		request.get( usersUrl, function( err, res, body) {
 			if ( !err && res.statusCode === 200) {
 				// console.log('Users info: '.yellow, res);
-				usersCache = JSON.parse( body ).response;
-				resolve( usersCache );
+				var _usersInfoCache = JSON.parse( body ).response;
+				resolve( { info: _usersInfoCache, users: users } );
 			}
 		});
 	});
@@ -121,14 +137,18 @@ var getDataFromPublic = function( publicName, params ) {
 
 	return Q.Promise(function( resolve ) {
 		getWallPosts( publicName, params )
-			.then( _.bind( _extractUsersIds, this ) )
-			.then( _.bind(  getUsersInfo, this ) )
-			.then(function() {
-				new Firebase(firebaseConfig.publicsRef + '/' + publicName).set( usersCache );
+			.then( _.bind( _updateUsersCache, this ) )
+			.then( _.bind( getUsersInfo, this ) )
+			.then( _.bind( mergePostsToUsers ), this )
+			.then(function( _usersCache ) {
+				_.extend( usersCache, _usersCache );
+				// console.log('Firebase arguments'.blue, _usersCache );
+				new Firebase( firebaseConfig.publicsRef + '/' + publicName ).update( _usersCache );
 			})
 			.catch(function(err) {
 				console.log('Error was catched!'.red, err);
-			})
+				console.log(err.stack);
+			});
 	});
 
 };
