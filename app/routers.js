@@ -1,17 +1,21 @@
-module.exports = function( app ) {
+var express = require('express');
+var router = express.Router();
+var vkApi = require('./services/vk');
 
+router.get('/women', function(req, res) {
+	res.json('Women');
+	console.log("message", vkApi);
+	vkApi.getDataFromPublic()
+	// 	console.log('Ten!');
+	// });
+});
 
-	app.get('/women', function(req, res) {
-		console.log("Handle women get");
-	});
+router.get('/men', function(req, res) {
+	res.json('Men');
+});
 
-	app.get('/men', function(req, res) {
-		console.log("Handle men get");
-	});
+router.get('/', function(req, res) {
+	res.sendFile(__dirname + '/../dist/index.html');
+});
 
-	app.get('*', function(req, res) {
-		console.log("Dir name is ", __dirname);
-		res.sendFile(__dirname + '/../dist/index.html');
-	});
-
-};
+module.exports = router;
